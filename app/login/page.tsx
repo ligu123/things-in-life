@@ -6,6 +6,17 @@ type LoginPageProps = {
   searchParams: Promise<{ error?: string }>;
 };
 
+function errorMessage(error: string | undefined): string | null {
+  if (!error) return null;
+  if (error === "AccessDenied") {
+    return "This Google account isn’t allowed to use Things in life.";
+  }
+  if (error === "Configuration") {
+    return "Sign-in isn’t configured yet. Try again in a moment.";
+  }
+  return "Something went wrong signing in. Please try again.";
+}
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
   if (session?.user) {
@@ -13,35 +24,37 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   const { error } = await searchParams;
-  const denied = error === "AccessDenied";
+  const message = errorMessage(error);
 
   return (
     <div className="app-canvas flex min-h-full flex-1 flex-col">
       <main className="flex flex-1 flex-col items-center justify-center px-5 py-16 sm:px-8">
-        <div className="flex w-full max-w-sm flex-col items-center gap-10 text-center">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-lg font-medium tracking-tight text-[var(--ink)]">
-              Things-in-life
+        <div className="flex w-full max-w-sm flex-col items-center gap-6 text-center">
+          <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+            <h1 className="text-xl font-medium tracking-tight text-[var(--ink)]">
+              Things in life,
             </h1>
-            <p className="text-lg text-[var(--muted)]">
-              Making life better everyday.
+            <p className="text-xl text-[var(--muted)]">
+              a bit better everyday.
             </p>
-            {denied ? (
-              <p role="alert" className="pt-1 text-sm text-[var(--danger)]">
-                This Google account isn’t allowed to use to-dos.
+          </div>
+
+          <div className="flex w-full flex-col items-center gap-3">
+            <form action={signInWithGoogle} className="w-full">
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-3 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
+              >
+                <GoogleMark />
+                Continue with Google
+              </button>
+            </form>
+            {message ? (
+              <p role="alert" className="text-sm text-[var(--danger)]">
+                {message}
               </p>
             ) : null}
           </div>
-
-          <form action={signInWithGoogle} className="w-full">
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-3 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
-            >
-              <GoogleMark />
-              Continue with Google
-            </button>
-          </form>
         </div>
       </main>
     </div>

@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: [
-      "You are a concise todo-list agent for the Lista app.",
+      "You are a concise todo-list agent for the Things in life app.",
       "Use tools to add, toggle, edit, delete, list, or clear completed tasks.",
       "Do not invent todo ids — use ids from the snapshot or list_todos.",
       "After tool results, briefly confirm what changed. No markdown fluff.",

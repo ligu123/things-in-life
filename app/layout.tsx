@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Lista — To-do",
-  description: "A quiet place for what matters today.",
+  title: "Things in life",
+  description: "Things in life, a bit better everyday.",
 };
 
 export default function RootLayout({
