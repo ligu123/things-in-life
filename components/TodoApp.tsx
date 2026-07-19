@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Todo, TodoFilter } from "@/lib/types";
+import type { TodoFilter } from "@/lib/types";
 import {
   addTodo,
   clearCompleted,
@@ -65,7 +65,6 @@ export function TodoApp() {
   const todos = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [filter, setFilter] = useState<TodoFilter>("all");
   const [agentMode, setAgentMode] = useState(false);
-  const [pendingShare, setPendingShare] = useState<Todo[] | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,7 +114,8 @@ export function TodoApp() {
       if (cancelled) return;
 
       if (result.status === "ok") {
-        setPendingShare(result.todos);
+        replaceTodos(result.todos);
+        clearShareHash();
         setShareError(null);
         return;
       }
@@ -137,18 +137,6 @@ export function TodoApp() {
   async function handleShare() {
     const url = await buildShareUrl(getSnapshot());
     await copyText(url);
-  }
-
-  function dismissShare() {
-    setPendingShare(null);
-    clearShareHash();
-  }
-
-  function importShare() {
-    if (!pendingShare) return;
-    replaceTodos(pendingShare);
-    setPendingShare(null);
-    clearShareHash();
   }
 
   const completedCount = todos.filter((todo) => todo.completed).length;
@@ -186,36 +174,6 @@ export function TodoApp() {
             onClearCompleted={clearCompleted}
             onShare={handleShare}
           />
-
-          {pendingShare ? (
-            <div
-              role="region"
-              aria-label="Import shared list"
-              className="flex flex-col gap-3 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <p className="text-sm text-[var(--ink)]">
-                Import {pendingShare.length} shared{" "}
-                {pendingShare.length === 1 ? "task" : "tasks"}? This replaces
-                your current list.
-              </p>
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={dismissShare}
-                  className="rounded-lg px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--ink)]"
-                >
-                  Dismiss
-                </button>
-                <button
-                  type="button"
-                  onClick={importShare}
-                  className="rounded-lg bg-[var(--ink)] px-3 py-1.5 text-sm text-[var(--background)] transition-opacity hover:opacity-90"
-                >
-                  Import
-                </button>
-              </div>
-            </div>
-          ) : null}
 
           {shareError ? (
             <p role="status" className="text-sm text-[var(--muted)]">

@@ -249,7 +249,7 @@ export function TodoInput({
           </button>
 
           <div
-            className="overflow-hidden rounded-t-2xl rounded-b-none border-[0.5px] border-b-0 border-[var(--line)] bg-[var(--surface-muted)]"
+            className="todo-agent-chat overflow-hidden rounded-t-2xl rounded-b-none border-[0.5px] border-b-0"
             style={{ height: chatHeight }}
           >
             <div
@@ -361,7 +361,7 @@ export function TodoInput({
 
       <form
         onSubmit={handleSubmit}
-        className="overflow-hidden rounded-2xl border-[0.5px] border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_0_rgba(20,40,36,0.04)]"
+        className="todo-composer overflow-hidden rounded-2xl border-[0.5px] border-[var(--line)] bg-[var(--surface)]"
       >
         <div className="px-4 pt-4 pb-1">
           <label htmlFor="composer-input" className="sr-only">
@@ -394,7 +394,7 @@ export function TodoInput({
               className={[
                 "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors",
                 agentMode
-                  ? "bg-[var(--ink)] text-[var(--surface)]"
+                  ? "bg-[var(--surface-muted)] text-[var(--ink)]"
                   : "text-[var(--muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]",
               ].join(" ")}
             >
@@ -402,7 +402,7 @@ export function TodoInput({
                 className={[
                   "size-1.5 rounded-full",
                   agentMode
-                    ? "bg-[var(--surface)]"
+                    ? "bg-[var(--ink)]"
                     : "bg-[var(--line-strong)]",
                 ].join(" ")}
                 aria-hidden
