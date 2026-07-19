@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { LoginRiverBackground } from "@/components/LoginRiverBackground";
+import {
+  LOGIN_WAVES_DISPLAY_HEIGHT,
+  LOGIN_WAVES_DISPLAY_WIDTH,
+} from "@/lib/login-waves-paths";
 import { signInWithGoogle } from "@/lib/auth-actions";
 
 type LoginPageProps = {
@@ -27,34 +32,54 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const message = errorMessage(error);
 
   return (
-    <div className="app-canvas flex min-h-full flex-1 flex-col">
-      <main className="flex flex-1 flex-col items-center justify-center px-5 py-16 sm:px-8">
-        <div className="flex w-full max-w-sm flex-col items-center gap-6 text-center">
-          <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
-            <h1 className="text-xl font-medium tracking-tight text-[var(--ink)]">
-              Things in life,
-            </h1>
-            <p className="text-xl text-[var(--muted)]">
-              a bit better everyday.
-            </p>
+    <div className="app-canvas relative flex min-h-full flex-1 flex-col">
+      <main className="login-content relative z-10 flex flex-1 flex-col items-center justify-center px-5 py-16 sm:px-8">
+        {/*
+          Waves sit above title/button. Matching spacer below keeps the
+          title+button block at the true vertical center of the screen.
+        */}
+        <div className="flex w-full max-w-sm flex-col items-center text-center">
+          <div className="mb-16 flex justify-center">
+            <LoginRiverBackground />
           </div>
 
-          <div className="flex w-full flex-col items-center gap-3">
-            <form action={signInWithGoogle} className="w-full">
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-3 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
-              >
-                <GoogleMark />
-                Continue with Google
-              </button>
-            </form>
-            {message ? (
-              <p role="alert" className="text-sm text-[var(--danger)]">
-                {message}
+          <div className="flex w-full flex-col items-center gap-6">
+            <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+              <h1 className="text-lg font-medium tracking-tight text-[var(--ink)]">
+                Things in life,
+              </h1>
+              <p className="text-lg text-[var(--muted)]">
+                a bit better everyday.
               </p>
-            ) : null}
+            </div>
+
+            <div className="flex w-full flex-col items-center gap-3">
+              <form action={signInWithGoogle} className="w-full">
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-3 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--ink)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
+                >
+                  <GoogleMark />
+                  Continue with Google
+                </button>
+              </form>
+              {message ? (
+                <p role="alert" className="text-sm text-[var(--danger)]">
+                  {message}
+                </p>
+              ) : null}
+            </div>
           </div>
+
+          {/* Same size as the wave block so center stays on title/button */}
+          <div
+            className="pointer-events-none invisible mt-16 shrink-0"
+            style={{
+              height: LOGIN_WAVES_DISPLAY_HEIGHT,
+              width: LOGIN_WAVES_DISPLAY_WIDTH,
+            }}
+            aria-hidden
+          />
         </div>
       </main>
     </div>
