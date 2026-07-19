@@ -1,26 +1,124 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 14%);
+  --ink: hsl(0, 0%, 14%);
+  --muted: hsl(0, 0%, 41%);
+  --surface: hsl(0, 0%, 100%);
+  --surface-muted: hsl(0, 0%, 98%);
+  --line: hsl(0, 0%, 90%);
+  --line-strong: hsl(0, 0%, 64%);
+  --accent: hsl(0, 0%, 39%);
+  --accent-soft: hsla(0, 0%, 31%, 0.18);
+  --danger: hsl(0, 40%, 50%);
+  --danger-soft: hsla(0, 80%, 98%, 1);
 }
+
+.dark {
+  --background: hsl(0, 0%, 8%);
+  --foreground: hsl(0, 0%, 94%);
+  --ink: hsl(0, 0%, 94%);
+  --muted: hsl(0, 0%, 62%);
+  --surface: hsl(0, 0%, 11%);
+  --surface-muted: hsl(0, 0%, 15%);
+  --line: hsl(0, 0%, 22%);
+  --line-strong: hsl(0, 0%, 48%);
+  --accent: hsl(0, 0%, 72%);
+  --accent-soft: hsla(0, 0%, 90%, 0.14);
+  --danger: hsl(0, 45%, 62%);
+  --danger-soft: hsla(0, 30%, 18%, 1);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, sans-serif;
+}
+
+/* Page background */
+.app-canvas {
+  background: var(--background);
+}
+
+.todo-tasks {
+  animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.todo-input-bar {
+  animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.todo-item {
+  animation: item-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.todo-item.completed button[aria-label="Mark as active"] {
+  animation: check-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.empty-hint {
+  animation: fade-in 0.4s ease both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .todo-input-bar,
+  .todo-tasks,
+  .todo-item,
+  .todo-item.completed button[aria-label="Mark as active"],
+  .empty-hint {
+    animation: none;
+  }
 }
