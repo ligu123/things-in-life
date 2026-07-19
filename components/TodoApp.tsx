@@ -194,7 +194,7 @@ export function TodoApp() {
         </div>
       </div>
 
-      <div className="todo-input-bar sticky bottom-0 z-20 bg-[var(--background)]/95 px-5 pb-10 backdrop-blur-sm sm:px-8">
+      <div className="todo-input-bar sticky bottom-0 z-20 bg-[var(--background)]/95 px-5 pb-10 sm:px-8">
         <div className="relative mx-auto w-full max-w-[650px]">
           <TodoInput
             onAdd={addTodo}

@@ -55,7 +55,7 @@ body {
 }
 
 .todo-input-bar {
-  animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  animation: fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
 }
 
 .todo-composer {
@@ -69,25 +69,19 @@ body {
 }
 
 .todo-agent-chat {
-  background: hsla(0, 0%, 100%, 0.78);
-  border-color: hsla(0, 0%, 92%, 0.9);
+  background: var(--surface-muted);
+  border-color: var(--line);
   box-shadow:
     0 1px 2px hsla(0, 0%, 0%, 0.04),
-    0 8px 28px hsla(0, 0%, 0%, 0.08),
-    inset 0 1px 0 hsla(0, 0%, 100%, 0.85);
-  backdrop-filter: blur(120px) saturate(1.2);
-  -webkit-backdrop-filter: blur(64px) saturate(1.2);
+    0 8px 28px hsla(0, 0%, 0%, 0.08);
 }
 
 .dark .todo-agent-chat {
-  background: hsla(0, 0%, 10%, 0.82);
-  border-color: hsla(0, 0%, 100%, 0.1);
+  background: var(--surface-muted);
+  border-color: var(--line);
   box-shadow:
     0 1px 0 hsla(0, 0%, 100%, 0.06),
-    0 10px 32px hsla(0, 0%, 0%, 0.35),
-    inset 0 1px 0 hsla(0, 0%, 100%, 0.08);
-  backdrop-filter: blur(64px) saturate(1.15);
-  -webkit-backdrop-filter: blur(64px) saturate(1.15);
+    0 10px 32px hsla(0, 0%, 0%, 0.35);
 }
 
 .todo-item {

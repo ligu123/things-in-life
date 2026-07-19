@@ -249,7 +249,7 @@ export function TodoInput({
           </button>
 
           <div
-            className="todo-agent-chat overflow-hidden rounded-t-2xl rounded-b-none border-[0.5px] border-b-0"
+            className="todo-agent-chat rounded-t-2xl rounded-b-none border-[0.5px] border-b-0"
             style={{ height: chatHeight }}
           >
             <div
