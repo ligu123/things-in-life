@@ -6,6 +6,7 @@ import {
   ChevronRight,
   EllipsisVertical,
   ListChecks,
+  LogOut,
   Monitor,
   Moon,
   Palette,
@@ -13,6 +14,7 @@ import {
   Sun,
   type LucideIcon,
 } from "lucide-react";
+import { signOutAction } from "@/lib/auth-actions";
 import {
   getServerThemeMode,
   getThemeMode,
@@ -254,6 +256,24 @@ export function TodoOptionsMenu({
               </div>
             ) : null}
           </div>
+
+          <div
+            role="separator"
+            className="my-1 border-t-[0.5px] border-[var(--line)]"
+          />
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              closeMenus();
+              void signOutAction();
+            }}
+            className={menuItemClass}
+          >
+            <LogOut className="size-3.5 shrink-0 text-[var(--muted)]" aria-hidden />
+            Sign out
+          </button>
         </div>
       ) : null}
     </div>

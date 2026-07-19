@@ -4,12 +4,18 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
+import { auth } from "@/auth";
 import { agentTools } from "@/lib/agent-tools";
 import type { Todo } from "@/lib/types";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user) {
+    return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return Response.json(
       {
