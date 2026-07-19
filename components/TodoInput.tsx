@@ -34,7 +34,7 @@ import { getSnapshot } from "@/lib/todo-store";
 
 const CHAT_HEIGHT_MIN = 48;
 const CHAT_HEIGHT_MAX = 480;
-const CHAT_HEIGHT_DEFAULT = 176;
+const CHAT_HEIGHT_DEFAULT = CHAT_HEIGHT_MIN;
 const CHAT_RESIZE_CLICK_THRESHOLD = 4;
 
 type TodoInputProps = {
@@ -361,7 +361,7 @@ export function TodoInput({
 
       <form
         onSubmit={handleSubmit}
-        className="todo-composer overflow-hidden rounded-2xl border-[0.5px] border-[var(--line)] bg-[var(--surface)]"
+        className="todo-composer relative z-30 overflow-hidden rounded-2xl border-[0.5px] border-[var(--line)] bg-[var(--surface)]"
       >
         <div className="px-4 pt-4 pb-1">
           <label htmlFor="composer-input" className="sr-only">
@@ -402,7 +402,7 @@ export function TodoInput({
                 className={[
                   "size-1.5 rounded-full",
                   agentMode
-                    ? "bg-[var(--ink)]"
+                    ? "bg-[var(--danger)]"
                     : "bg-[var(--line-strong)]",
                 ].join(" ")}
                 aria-hidden
