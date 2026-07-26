@@ -1,5 +1,13 @@
+import { normalizeTodo } from "@/lib/normalize-todo";
 import { loadTodos, saveTodos } from "@/lib/storage";
 import type { Todo } from "@/lib/types";
+
+function normalizeTodoList(value: unknown): Todo[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map(normalizeTodo)
+    .filter((todo): todo is Todo => todo !== null);
+}
 
 const EMPTY: Todo[] = [];
 const HISTORY_LIMIT = 50;
@@ -45,12 +53,10 @@ function loadHistory(): HistoryState {
 
     const record = parsed as Record<string, unknown>;
     const nextPast = Array.isArray(record.past)
-      ? record.past.filter(Array.isArray).map((entry) => cloneTodos(entry as Todo[]))
+      ? record.past.map(normalizeTodoList)
       : [];
     const nextFuture = Array.isArray(record.future)
-      ? record.future
-          .filter(Array.isArray)
-          .map((entry) => cloneTodos(entry as Todo[]))
+      ? record.future.map(normalizeTodoList)
       : [];
 
     return { past: nextPast, future: nextFuture };

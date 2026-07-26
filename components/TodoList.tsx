@@ -6,7 +6,8 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   type DragEndEvent,
   type DragOverEvent,
@@ -20,6 +21,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import type { UpdateTodoMetaInput } from "@/lib/todo-actions";
 import type { Todo } from "@/lib/types";
 import { TodoItem, TodoItemOverlay } from "./TodoItem";
 
@@ -27,6 +29,7 @@ type TodoListProps = {
   todos: Todo[];
   onToggle: (id: string) => void;
   onEdit: (id: string, text: string) => void;
+  onUpdateMeta: (id: string, meta: UpdateTodoMetaInput) => void;
   onDelete: (id: string) => void;
   onReorder: (visibleIds: string[]) => void;
   emptyMessage: string;
@@ -36,6 +39,7 @@ export function TodoList({
   todos,
   onToggle,
   onEdit,
+  onUpdateMeta,
   onDelete,
   onReorder,
   emptyMessage,
@@ -55,8 +59,12 @@ export function TodoList({
   }, [todos, activeId]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: { distance: 6 },
+    }),
+    useSensor(TouchSensor, {
+      // Delay so vertical scroll wins over accidental reorders on phones.
+      activationConstraint: { delay: 200, tolerance: 6 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -142,6 +150,7 @@ export function TodoList({
               todo={todo}
               onToggle={onToggle}
               onEdit={onEdit}
+              onUpdateMeta={onUpdateMeta}
               onDelete={onDelete}
               canReorder={canReorder}
             />

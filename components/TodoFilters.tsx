@@ -35,11 +35,11 @@ export function TodoFilters({
   };
 
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
       <div
         role="tablist"
         aria-label="Filter tasks"
-        className="inline-flex shrink-0 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface-muted)] p-1 gap-0"
+        className="inline-flex max-w-full shrink-0 rounded-xl border-[0.5px] border-[var(--line)] bg-[var(--surface-muted)] p-1 gap-0"
       >
         {FILTERS.map(({ id, label }) => {
           const selected = filter === id;
@@ -51,7 +51,7 @@ export function TodoFilters({
               role="tab"
               aria-selected={selected}
               onClick={() => onFilterChange(id)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors sm:gap-1.5 sm:px-2.5 sm:py-0.5 ${
                 selected
                   ? "bg-[var(--surface)] text-[var(--ink)] shadow-sm"
                   : "text-[var(--muted)] hover:text-[var(--ink)]"

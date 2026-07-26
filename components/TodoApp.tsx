@@ -8,6 +8,8 @@ import {
   deleteTodo,
   editTodo,
   toggleTodo,
+  updateTodoMeta,
+  type AddTodoOptions,
 } from "@/lib/todo-actions";
 import {
   buildShareUrl,
@@ -162,7 +164,7 @@ export function TodoApp() {
             : "No tasks yet — add one below.";
 
   return (
-    <div className="todo-shell flex min-h-full flex-1 flex-col">
+    <div className="todo-shell flex min-h-dvh flex-1 flex-col overflow-x-clip">
       <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-8">
         <div className="todo-tasks mx-auto flex w-full max-w-[650px] flex-col gap-6">
           <TodoFilters
@@ -186,6 +188,7 @@ export function TodoApp() {
               todos={visibleTodos}
               onToggle={toggleTodo}
               onEdit={editTodo}
+              onUpdateMeta={updateTodoMeta}
               onDelete={deleteTodo}
               onReorder={reorderByVisibleOrder}
               emptyMessage={emptyMessage}
@@ -194,10 +197,10 @@ export function TodoApp() {
         </div>
       </div>
 
-      <div className="todo-input-bar sticky bottom-0 z-20 bg-[var(--background)]/95 px-5 pb-10 sm:px-8">
+      <div className="todo-input-bar sticky bottom-0 z-20 bg-[var(--background)]/95 px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8">
         <div className="relative mx-auto w-full max-w-[650px]">
           <TodoInput
-            onAdd={addTodo}
+            onAdd={(text: string, opts?: AddTodoOptions) => addTodo(text, opts)}
             agentMode={agentMode}
             onAgentModeChange={setAgentMode}
           />

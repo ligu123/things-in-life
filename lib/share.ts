@@ -1,3 +1,4 @@
+import { normalizeTodo } from "./normalize-todo";
 import type { Todo } from "./types";
 
 const SHARE_PREFIX = "share=";
@@ -13,18 +14,6 @@ export type ParseShareResult =
   | { status: "none" }
   | { status: "ok"; todos: Todo[] }
   | { status: "error"; message: string };
-
-function isTodo(value: unknown): value is Todo {
-  if (typeof value !== "object" || value === null) return false;
-
-  const todo = value as Record<string, unknown>;
-  return (
-    typeof todo.id === "string" &&
-    typeof todo.text === "string" &&
-    typeof todo.completed === "boolean" &&
-    typeof todo.createdAt === "number"
-  );
-}
 
 function toBase64Url(bytes: Uint8Array): string {
   let binary = "";
@@ -110,7 +99,9 @@ function parsePayloadJson(json: string): Todo[] {
     throw new Error("Shared list is too large.");
   }
 
-  const todos = record.todos.filter(isTodo);
+  const todos = record.todos
+    .map(normalizeTodo)
+    .filter((todo): todo is Todo => todo !== null);
   if (todos.length !== record.todos.length) {
     throw new Error("Shared list is invalid.");
   }

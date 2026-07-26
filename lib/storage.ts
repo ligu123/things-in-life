@@ -1,3 +1,4 @@
+import { normalizeTodo } from "./normalize-todo";
 import type { Todo } from "./types";
 
 const STORAGE_KEY = "todo-list:todos";
@@ -12,7 +13,9 @@ export function loadTodos(): Todo[] {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.filter(isTodo);
+    return parsed
+      .map(normalizeTodo)
+      .filter((todo): todo is Todo => todo !== null);
   } catch {
     return [];
   }
@@ -26,16 +29,4 @@ export function saveTodos(todos: Todo[]): void {
   } catch {
     // Ignore quota / private-mode failures
   }
-}
-
-function isTodo(value: unknown): value is Todo {
-  if (typeof value !== "object" || value === null) return false;
-
-  const todo = value as Record<string, unknown>;
-  return (
-    typeof todo.id === "string" &&
-    typeof todo.text === "string" &&
-    typeof todo.completed === "boolean" &&
-    typeof todo.createdAt === "number"
-  );
 }

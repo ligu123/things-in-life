@@ -84,6 +84,18 @@ body {
     0 -10px 28px hsla(0, 0%, 0%, 0.35);
 }
 
+.todo-shell {
+  overflow-x: clip;
+}
+
+.composer-toolbar {
+  scrollbar-width: none;
+}
+
+.composer-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
 .todo-item {
   animation: item-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

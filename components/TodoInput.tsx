@@ -30,7 +30,10 @@ import {
   useState,
 } from "react";
 import { runAgentTool, toolSummary } from "@/lib/run-agent-tool";
+import type { AddTodoOptions } from "@/lib/todo-actions";
 import { getSnapshot } from "@/lib/todo-store";
+import type { Recurrence } from "@/lib/types";
+import { DueBadge, RecurrenceBadge } from "./TodoMetaBadges";
 
 const CHAT_HEIGHT_MIN = 48;
 const CHAT_HEIGHT_MAX = 480;
@@ -38,7 +41,7 @@ const CHAT_HEIGHT_DEFAULT = CHAT_HEIGHT_MIN;
 const CHAT_RESIZE_CLICK_THRESHOLD = 4;
 
 type TodoInputProps = {
-  onAdd: (text: string) => void;
+  onAdd: (text: string, opts?: AddTodoOptions) => void;
   agentMode: boolean;
   onAgentModeChange: (on: boolean) => void;
 };
@@ -58,6 +61,8 @@ function toolActionIcon(toolName: string): ReactNode {
       return <Check className={className} aria-hidden />;
     case "edit_todo":
       return <Pencil className={className} aria-hidden />;
+    case "update_todo_meta":
+      return <Pencil className={className} aria-hidden />;
     case "delete_todo":
       return <Trash2 className={className} aria-hidden />;
     case "clear_completed":
@@ -73,6 +78,8 @@ export function TodoInput({
   onAgentModeChange,
 }: TodoInputProps) {
   const [text, setText] = useState("");
+  const [dueDate, setDueDate] = useState<string | null>(null);
+  const [recurrence, setRecurrence] = useState<Recurrence>("none");
   const [chatHeight, setChatHeight] = useState(CHAT_HEIGHT_DEFAULT);
   const listRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -177,8 +184,13 @@ export function TodoInput({
       return;
     }
 
-    onAdd(trimmed);
+    onAdd(trimmed, {
+      dueDate,
+      recurrence,
+    });
     setText("");
+    setDueDate(null);
+    setRecurrence("none");
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -249,7 +261,7 @@ export function TodoInput({
           </button>
 
           <div
-            className="todo-agent-chat rounded-t-2xl rounded-b-none border-[0.5px] border-b-0"
+            className="todo-agent-chat rounded-t-2xl rounded-b-none border-[0.5px] border-b-0 max-sm:max-h-[45dvh]"
             style={{ height: chatHeight }}
           >
             <div
@@ -385,7 +397,7 @@ export function TodoInput({
           <div
             role="toolbar"
             aria-label="Composer functions"
-            className="flex min-w-0 flex-wrap items-center gap-1"
+            className="composer-toolbar flex min-w-0 flex-nowrap items-center gap-1 overflow-x-auto"
           >
             <button
               type="button"
@@ -409,6 +421,16 @@ export function TodoInput({
               />
               Agent
             </button>
+
+            {!agentMode ? (
+              <>
+                <DueBadge dueDate={dueDate} onChange={setDueDate} />
+                <RecurrenceBadge
+                  recurrence={recurrence}
+                  onChange={setRecurrence}
+                />
+              </>
+            ) : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
