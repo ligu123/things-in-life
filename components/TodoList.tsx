@@ -21,8 +21,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { UpdateTodoMetaInput } from "@/lib/todo-actions";
-import type { Todo } from "@/lib/types";
+import type { Todo, UpdateTodoMetaInput } from "@/lib/types";
 import { TodoItem, TodoItemOverlay } from "./TodoItem";
 
 type TodoListProps = {

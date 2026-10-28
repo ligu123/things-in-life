@@ -1,40 +1,53 @@
 import { openai } from "@ai-sdk/openai";
 import {
   convertToModelMessages,
+  isStepCount,
   streamText,
   type UIMessage,
 } from "ai";
+import { createAgentTools } from "@/lib/agent-tools";
 import { auth } from "@/auth";
-import { agentTools } from "@/lib/agent-tools";
-import type { Todo } from "@/lib/types";
+import { rateLimit } from "@/lib/rate-limit";
+import { listTodosForUser } from "@/lib/todo-db";
 
 export const maxDuration = 30;
+export const runtime = "nodejs";
+
+const MAX_MESSAGES = 40;
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user) {
+  const userId = session?.user?.id;
+  if (!userId) {
     return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (!rateLimit(`agent:${userId}`)) {
+    return Response.json(
+      { error: "Too many assistant requests. Try again in a minute." },
+      { status: 429 },
+    );
   }
 
   if (!process.env.OPENAI_API_KEY) {
     return Response.json(
-      {
-        error:
-          "Missing OPENAI_API_KEY. Add it to .env.local and restart the dev server.",
-      },
-      { status: 500 },
+      { error: "The assistant is unavailable right now." },
+      { status: 503 },
     );
   }
 
-  let body: { messages?: UIMessage[]; todos?: Todo[] };
+  let body: { messages?: UIMessage[] };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const messages = body.messages ?? [];
-  const todos = Array.isArray(body.todos) ? body.todos : [];
+  const messages = Array.isArray(body.messages)
+    ? body.messages.slice(-MAX_MESSAGES)
+    : [];
+
+  const todos = await listTodosForUser(userId);
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
@@ -50,8 +63,11 @@ export async function POST(req: Request) {
       JSON.stringify(todos, null, 2),
     ].join("\n"),
     messages: await convertToModelMessages(messages),
-    tools: agentTools,
+    tools: createAgentTools(userId),
+    stopWhen: isStepCount(8),
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    onError: () => "The assistant is unavailable right now.",
+  });
 }

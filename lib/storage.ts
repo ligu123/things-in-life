@@ -30,3 +30,12 @@ export function saveTodos(todos: Todo[]): void {
     // Ignore quota / private-mode failures
   }
 }
+
+export function clearStoredTodos(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore
+  }
+}

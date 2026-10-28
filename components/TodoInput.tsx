@@ -5,7 +5,7 @@ import {
   DefaultChatTransport,
   getToolName,
   isToolUIPart,
-  lastAssistantMessageIsCompleteWithToolCalls,
+  type UIMessage,
 } from "ai";
 import {
   Check,
@@ -29,10 +29,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { runAgentTool, toolSummary } from "@/lib/run-agent-tool";
-import type { AddTodoOptions } from "@/lib/todo-actions";
-import { getSnapshot } from "@/lib/todo-store";
-import type { Recurrence } from "@/lib/types";
+import { normalizeTodo } from "@/lib/normalize-todo";
+import { toolSummary } from "@/lib/run-agent-tool";
+import { syncTodos } from "@/lib/todo-store";
+import type { AddTodoOptions, Recurrence, Todo } from "@/lib/types";
 import { DueBadge, RecurrenceBadge } from "./TodoMetaBadges";
 
 const CHAT_HEIGHT_MIN = 48;
@@ -48,6 +48,24 @@ type TodoInputProps = {
 
 function clampChatHeight(value: number) {
   return Math.min(CHAT_HEIGHT_MAX, Math.max(CHAT_HEIGHT_MIN, value));
+}
+
+function todosFromMessages(messages: UIMessage[]): Todo[] | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const parts = messages[i]?.parts ?? [];
+    for (let j = parts.length - 1; j >= 0; j--) {
+      const part = parts[j];
+      if (!isToolUIPart(part) || part.state !== "output-available") continue;
+      const output = part.output;
+      if (!output || typeof output !== "object") continue;
+      const raw = (output as { todos?: unknown }).todos;
+      if (!Array.isArray(raw)) continue;
+      return raw
+        .map(normalizeTodo)
+        .filter((todo): todo is Todo => todo !== null);
+    }
+  }
+  return null;
 }
 
 function toolActionIcon(toolName: string): ReactNode {
@@ -90,43 +108,18 @@ export function TodoInput({
     () =>
       new DefaultChatTransport({
         api: "/api/agent",
-        body: () => ({ todos: getSnapshot() }),
       }),
     [],
   );
 
-  const { messages, sendMessage, addToolOutput, status, error, clearError } =
-    useChat({
-      transport,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-      async onToolCall({ toolCall }) {
-        if (toolCall.dynamic) return;
+  const { messages, sendMessage, status, error, clearError } = useChat({
+    transport,
+  });
 
-        const toolInput =
-          "input" in toolCall &&
-          toolCall.input &&
-          typeof toolCall.input === "object"
-            ? (toolCall.input as Record<string, unknown>)
-            : {};
-
-        try {
-          const output = runAgentTool(toolCall.toolName, toolInput);
-          addToolOutput({
-            tool: toolCall.toolName,
-            toolCallId: toolCall.toolCallId,
-            output,
-          });
-        } catch (err) {
-          addToolOutput({
-            tool: toolCall.toolName,
-            toolCallId: toolCall.toolCallId,
-            state: "output-error",
-            errorText:
-              err instanceof Error ? err.message : "Tool execution failed",
-          });
-        }
-      },
-    });
+  useEffect(() => {
+    const todos = todosFromMessages(messages);
+    if (todos) syncTodos(todos);
+  }, [messages]);
 
   const busy = agentMode && (status === "submitted" || status === "streaming");
   const canSubmit = Boolean(text.trim()) && !busy;
@@ -362,7 +355,7 @@ export function TodoInput({
                 {error ? (
                   <p className="mt-2 text-sm text-[var(--danger)]" role="alert">
                     {error.message ||
-                      "Something went wrong talking to the agent. Check OPENAI_API_KEY."}
+                      "Something went wrong talking to the agent."}
                   </p>
                 ) : null}
               </div>

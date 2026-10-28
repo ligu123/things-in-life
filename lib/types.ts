@@ -10,3 +10,13 @@ export type Todo = {
 };
 
 export type TodoFilter = "all" | "active" | "completed";
+
+export type AddTodoOptions = {
+  dueDate?: string | null;
+  recurrence?: Recurrence;
+};
+
+export type UpdateTodoMetaInput = {
+  dueDate?: string | null;
+  recurrence?: Recurrence;
+};

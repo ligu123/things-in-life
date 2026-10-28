@@ -34,6 +34,12 @@ yarn-error.log*
 .env*
 !.env.local.example
 
+# sqlite
+/prisma/*.db
+/prisma/*.db-journal
+/prisma/*.db-shm
+/prisma/*.db-wal
+
 # vercel
 .vercel
 

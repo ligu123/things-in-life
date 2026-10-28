@@ -1,5 +1,6 @@
+"use client";
+
 import { normalizeTodo } from "@/lib/normalize-todo";
-import { loadTodos, saveTodos } from "@/lib/storage";
 import type { Todo } from "@/lib/types";
 
 function normalizeTodoList(value: unknown): Todo[] {
@@ -88,7 +89,7 @@ function ensureHistoryLoaded() {
 
 export function getSnapshot(): Todo[] {
   if (memoryTodos === null) {
-    memoryTodos = loadTodos();
+    memoryTodos = [];
   }
   ensureHistoryLoaded();
   return memoryTodos;
@@ -100,8 +101,23 @@ export function getServerSnapshot(): Todo[] {
 
 function applyTodos(next: Todo[]) {
   memoryTodos = cloneTodos(next);
-  saveTodos(memoryTodos);
   emit();
+}
+
+let hydratedFrom: Todo[] | null = null;
+
+export function hydrateTodos(todos: Todo[]) {
+  if (hydratedFrom === todos) return;
+  hydratedFrom = todos;
+  memoryTodos = cloneTodos(todos);
+  past = [];
+  future = [];
+  historyLoaded = true;
+  persistHistory();
+}
+
+export function syncTodos(next: Todo[]) {
+  applyTodos(next);
 }
 
 export function replaceTodos(next: Todo[]) {
@@ -112,47 +128,48 @@ export function replaceTodos(next: Todo[]) {
   applyTodos(next);
 }
 
-export function undoTodos() {
+export function undoLocal(): Todo[] | null {
   ensureHistoryLoaded();
-  if (past.length === 0) return false;
+  if (past.length === 0) return null;
 
   const previous = past[past.length - 1];
   past = past.slice(0, -1);
   future = [cloneTodos(getSnapshot()), ...future].slice(-HISTORY_LIMIT);
   persistHistory();
   applyTodos(previous);
-  return true;
+  return previous;
 }
 
-export function redoTodos() {
+export function redoLocal(): Todo[] | null {
   ensureHistoryLoaded();
-  if (future.length === 0) return false;
+  if (future.length === 0) return null;
 
   const next = future[0];
   future = future.slice(1);
   past = [...past, cloneTodos(getSnapshot())].slice(-HISTORY_LIMIT);
   persistHistory();
   applyTodos(next);
-  return true;
+  return next;
 }
 
-export function reorderByVisibleOrder(visibleIds: string[]) {
+export function reorderByVisibleOrder(visibleIds: string[]): Todo[] | null {
   const full = cloneTodos(getSnapshot());
   const visibleSet = new Set(visibleIds);
   const slots = full
     .map((todo, index) => (visibleSet.has(todo.id) ? index : -1))
     .filter((index) => index >= 0);
-  if (slots.length !== visibleIds.length) return;
+  if (slots.length !== visibleIds.length) return null;
 
   const byId = new Map(full.map((todo) => [todo.id, todo]));
   const next = [...full];
   for (let i = 0; i < visibleIds.length; i++) {
     const todo = byId.get(visibleIds[i]);
-    if (!todo) return;
+    if (!todo) return null;
     next[slots[i]] = todo;
   }
 
   const unchanged = next.every((todo, index) => todo.id === full[index].id);
-  if (unchanged) return;
+  if (unchanged) return null;
   replaceTodos(next);
+  return next;
 }

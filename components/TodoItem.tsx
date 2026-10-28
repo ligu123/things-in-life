@@ -8,8 +8,7 @@ import {
   formatDueBadgeLabel,
   isOverdue,
 } from "@/lib/recurrence";
-import type { UpdateTodoMetaInput } from "@/lib/todo-actions";
-import type { Recurrence, Todo } from "@/lib/types";
+import type { Recurrence, Todo, UpdateTodoMetaInput } from "@/lib/types";
 import { DueBadge, RecurrenceBadge } from "./TodoMetaBadges";
 
 type TodoItemProps = {

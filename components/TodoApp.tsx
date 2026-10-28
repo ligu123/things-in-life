@@ -1,29 +1,30 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { TodoFilter } from "@/lib/types";
+import type { AddTodoOptions, Todo, TodoFilter } from "@/lib/types";
 import {
   addTodo,
   clearCompleted,
   deleteTodo,
   editTodo,
+  importLocalTodos,
+  redoTodos,
+  reorderByVisibleOrder,
+  replaceAllTodos,
   toggleTodo,
+  undoTodos,
   updateTodoMeta,
-  type AddTodoOptions,
-} from "@/lib/todo-actions";
+} from "@/lib/todo-client";
 import {
   buildShareUrl,
   clearShareHash,
   parseShareHash,
 } from "@/lib/share";
+import { clearStoredTodos, loadTodos } from "@/lib/storage";
 import {
-  getServerSnapshot,
   getSnapshot,
-  redoTodos,
-  reorderByVisibleOrder,
-  replaceTodos,
+  hydrateTodos,
   subscribe,
-  undoTodos,
 } from "@/lib/todo-store";
 import { TodoFilters } from "./TodoFilters";
 import { TodoInput } from "./TodoInput";
@@ -63,8 +64,16 @@ async function copyText(text: string): Promise<void> {
   }
 }
 
-export function TodoApp() {
-  const todos = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export function TodoApp({ initialTodos }: { initialTodos: Todo[] }) {
+  if (typeof window !== "undefined") {
+    hydrateTodos(initialTodos);
+  }
+
+  const todos = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => initialTodos,
+  );
   const [filter, setFilter] = useState<TodoFilter>("all");
   const [agentMode, setAgentMode] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
@@ -76,14 +85,14 @@ export function TodoApp() {
       if (isUndoKey(event)) {
         event.preventDefault();
         event.stopPropagation();
-        undoTodos();
+        void undoTodos();
         return;
       }
 
       if (isRedoKey(event)) {
         event.preventDefault();
         event.stopPropagation();
-        redoTodos();
+        void redoTodos();
       }
     }
 
@@ -91,12 +100,12 @@ export function TodoApp() {
       const inputEvent = event as InputEvent;
       if (inputEvent.inputType === "historyUndo") {
         inputEvent.preventDefault();
-        undoTodos();
+        void undoTodos();
         return;
       }
       if (inputEvent.inputType === "historyRedo") {
         inputEvent.preventDefault();
-        redoTodos();
+        void redoTodos();
       }
     }
 
@@ -109,6 +118,13 @@ export function TodoApp() {
   }, []);
 
   useEffect(() => {
+    if (initialTodos.length > 0) return;
+    const local = loadTodos();
+    if (local.length === 0) return;
+    void importLocalTodos(local).then(() => clearStoredTodos());
+  }, [initialTodos.length]);
+
+  useEffect(() => {
     let cancelled = false;
 
     void (async () => {
@@ -116,7 +132,7 @@ export function TodoApp() {
       if (cancelled) return;
 
       if (result.status === "ok") {
-        replaceTodos(result.todos);
+        await replaceAllTodos(result.todos);
         clearShareHash();
         setShareError(null);
         return;
@@ -173,7 +189,9 @@ export function TodoApp() {
             totalCount={todos.length}
             activeCount={activeCount}
             completedCount={completedCount}
-            onClearCompleted={clearCompleted}
+            onClearCompleted={() => {
+              void clearCompleted();
+            }}
             onShare={handleShare}
           />
 
@@ -186,11 +204,21 @@ export function TodoApp() {
           <section className="todo-panel">
             <TodoList
               todos={visibleTodos}
-              onToggle={toggleTodo}
-              onEdit={editTodo}
-              onUpdateMeta={updateTodoMeta}
-              onDelete={deleteTodo}
-              onReorder={reorderByVisibleOrder}
+              onToggle={(id) => {
+                void toggleTodo(id);
+              }}
+              onEdit={(id, text) => {
+                void editTodo(id, text);
+              }}
+              onUpdateMeta={(id, meta) => {
+                void updateTodoMeta(id, meta);
+              }}
+              onDelete={(id) => {
+                void deleteTodo(id);
+              }}
+              onReorder={(visibleIds) => {
+                void reorderByVisibleOrder(visibleIds);
+              }}
               emptyMessage={emptyMessage}
             />
           </section>
@@ -200,7 +228,9 @@ export function TodoApp() {
       <div className="todo-input-bar sticky bottom-0 z-20 bg-[var(--background)]/95 px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8">
         <div className="relative mx-auto w-full max-w-[650px]">
           <TodoInput
-            onAdd={(text: string, opts?: AddTodoOptions) => addTodo(text, opts)}
+            onAdd={(text: string, opts?: AddTodoOptions) => {
+              void addTodo(text, opts);
+            }}
             agentMode={agentMode}
             onAgentModeChange={setAgentMode}
           />
